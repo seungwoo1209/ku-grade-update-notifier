@@ -17,7 +17,7 @@ provider "aws" {
 # terraform apply 후 대상 메일함에서 aws 이메일 수신을 완료해야 실제 이메일이 발송됨
 
 resource "aws_sns_topic" "grade-update-topic" {
-  name = "example-alerts-topic"
+  name = "grade-update-topic"
 }
 
 variable "notification_email" {

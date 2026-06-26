@@ -24,6 +24,7 @@ else
 fi
 
 echo
-echo "설치 완료:"
 terraform version
 aws --version
+
+echo "[설치 완료]"
