@@ -18,7 +18,7 @@
 #### 인프라 실행
 
 1. `./scripts/install.sh`를 실행하여 AWS CLI와 Terraform을 설치합니다. 이미 설치되어 있으면 해당 단계는 건너뜁니다.
-2. AWS 자격 증명을 아직 설정하지 않았다면 `aws configure`를 실행하여 설정합니다.
+2. AWS 자격 증명을 아직 설정하지 않았다면 `aws configure`를 실행하여 설정합니다. 이에 필요한 AWS access key ID와 Secret access key는 직접 구성해야 합니다.
 3. `./scripts/set-email.sh you@example.com`을 실행하여 알림을 받을 이메일 주소를 등록합니다. 주소를 생략하면 실행 중에 입력받습니다.
 4. `./scripts/up.sh`를 실행하여 인프라를 생성합니다.
 5. 최초 생성 후 받은 메일함에서 AWS가 보낸 SNS 구독 확인 메일을 승인합니다. 이 단계를 완료해야 실제 알림이 발송됩니다.
@@ -28,6 +28,10 @@
 - `./scripts/stop.sh` 를 실행하여 람다 함수의 스케줄을 중단합니다. 포털에 접속해야 하는 경우 실행이 권장됩니다.
 - `./scripts/resume.sh`를 실행하여 다시 stop.sh에서 중단 람다 함수를 스케줄을 다시 시작합니다.
 - 인프라를 전부 정리(모든 AWS 리소스 삭제)하려면 `./scripts/down.sh`를 실행합니다.
+
+#### 이메일 / ID / PW 수정
+- `./scripts/set-email.sh` 로 기존 이메일을 수정 시, up.sh를 재실행해야 적용됩니다.
+- `./scripts/set-id-password.sh`로 id/pw 수정 시엔 별도 스크립트 실행이 필요하지 않습니다.
 
 ### 주의 사항
 학사정보시스템은 한 세션에서 접속이 이루어지면 다른 세션에서는 로그아웃됩니다.
