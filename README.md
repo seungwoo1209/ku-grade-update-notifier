@@ -11,9 +11,10 @@
 - 로그인 정보와 직전 상태는 AWS SSM 파라미터 스토어에 저장됨
 
 ### 사용법
-현재 macOS만 지원합니다.
-아래 순서대로 스크립트를 실행하면 됩니다. 
-모든 스크립트는 리포지토리 어디에서 실행해도 동작합니다.
+
+macOS와 Windows를 모두 지원합니다. 사용하는 운영체제에 맞는 절차를 따르면 됩니다. 모든 스크립트는 리포지토리 어디에서 실행해도 동작합니다.
+
+### 사용법 (macOS)
 
 #### 인프라 실행
 
@@ -33,20 +34,50 @@
 - `./scripts/set-email.sh` 로 기존 이메일을 수정 시, up.sh를 재실행해야 적용됩니다.
 - `./scripts/set-id-password.sh`로 id/pw 수정 시엔 별도 스크립트 실행이 필요하지 않습니다.
 
+### 사용법 (Windows)
+
+Windows PowerShell에서 실행합니다. PowerShell은 기본적으로 스크립트 실행을 차단하므로, 최초 1회 아래 명령으로 현재 사용자에 한해 실행을 허용합니다.
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+또는 각 스크립트를 `powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1` 형태로 실행해도 됩니다.
+
+#### 인프라 실행
+
+1. `.\scripts\install.ps1`을 실행하여 winget으로 AWS CLI와 Terraform을 설치합니다. 이미 설치되어 있으면 해당 단계는 건너뜁니다. 새로 설치한 경우 PATH 반영을 위해 새 터미널을 엽니다.
+2. AWS 자격 증명을 아직 설정하지 않았다면 `aws configure`를 실행하여 설정합니다. 이에 필요한 AWS access key ID와 Secret access key는 직접 구성해야 합니다.
+3. `.\scripts\set-email.ps1 you@example.com`을 실행하여 알림을 받을 이메일 주소를 등록합니다. 주소를 생략하면 실행 중에 입력받습니다.
+4. `.\scripts\up.ps1`을 실행하여 인프라를 생성합니다.
+5. 최초 생성 후 받은 메일함에서 AWS가 보낸 SNS 구독 확인 메일을 승인합니다. 이 단계를 완료해야 실제 알림이 발송됩니다.
+6. `.\scripts\set-id-password.ps1`을 실행하여 포털 로그인 ID와 비밀번호를 등록합니다. 이 단계는 인프라가 먼저 존재해야 하므로 반드시 `up.ps1` 이후에 실행합니다.
+
+#### 인프라 정지/재개/삭제
+- `.\scripts\stop.ps1` 을 실행하여 람다 함수의 스케줄을 중단합니다. 포털에 접속해야 하는 경우 실행이 권장됩니다.
+- `.\scripts\resume.ps1`을 실행하여 다시 stop.ps1에서 중단한 람다 함수의 스케줄을 다시 시작합니다.
+- 인프라를 전부 정리(모든 AWS 리소스 삭제)하려면 `.\scripts\down.ps1`을 실행합니다.
+
+#### 이메일 / ID / PW 수정
+- `.\scripts\set-email.ps1` 로 기존 이메일을 수정 시, up.ps1을 재실행해야 적용됩니다.
+- `.\scripts\set-id-password.ps1`로 id/pw 수정 시엔 별도 스크립트 실행이 필요하지 않습니다.
+
 ### 주의 사항
 - SNS 구독 확인 이메일이 스팸함에 있을 수 있습니다.
 - 학사정보시스템은 한 세션에서 접속이 이루어지면 다른 세션에서는 로그아웃됩니다.
 람다 함수가 5분마다 실행되면 자동으로 로그아웃 시 재로그인하며, 이때 사용자가 포털에 접속 중이라면 로그아웃됩니다.
-따라서 포털에 접속하여 길게 머물러야 할 경우, `./scripts/stop.sh` 를 실행하여 람다 함수의 실행을 멈출 것을 권장합니다.
+따라서 포털에 접속하여 길게 머물러야 할 경우, `stop.sh`(macOS) 또는 `stop.ps1`(Windows)을 실행하여 람다 함수의 실행을 멈출 것을 권장합니다.
 
 ### 스크립트 목록
 
+각 스크립트는 macOS용 `.sh`와 Windows용 `.ps1` 두 형태로 제공되며 동작은 동일합니다.
+
 | 스크립트 | 동작 |
 | --- | --- |
-| `install.sh` | MacOS Homebrew로 AWS CLI와 Terraform을 설치합니다. 이미 설치된 도구에 대해선 건너뜁니다. |
-| `set-email.sh` | 알림을 받을 이메일 주소를 `terraform.tfvars`에 기록합니다. |
-| `set-id-password.sh` | 포털 로그인 ID와 비밀번호를 SSM SecureString 파라미터에 저장합니다. |
-| `up.sh` | Terraform을 초기화하고 인프라를 생성하거나 갱신합니다. |
-| `stop.sh` | EventBridge 스케줄을 비활성화하여 성적 감시를 멈춥니다. |
-| `resume.sh` | EventBridge 스케줄을 다시 활성화하여 성적 감시를 재개합니다. |
-| `down.sh` | Terraform으로 생성한 인프라를 전부 삭제합니다. |
+| `install` | AWS CLI와 Terraform을 설치합니다. macOS는 Homebrew, Windows는 winget을 사용하며, 이미 설치된 도구는 건너뜁니다. |
+| `set-email` | 알림을 받을 이메일 주소를 `terraform.tfvars`에 기록합니다. |
+| `set-id-password` | 포털 로그인 ID와 비밀번호를 SSM SecureString 파라미터에 저장합니다. |
+| `up` | Terraform을 초기화하고 인프라를 생성하거나 갱신합니다. |
+| `stop` | EventBridge 스케줄을 비활성화하여 성적 감시를 멈춥니다. |
+| `resume` | EventBridge 스케줄을 다시 활성화하여 성적 감시를 재개합니다. |
+| `down` | Terraform으로 생성한 인프라를 전부 삭제합니다. |
