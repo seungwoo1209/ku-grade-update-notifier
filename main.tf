@@ -11,6 +11,12 @@ terraform {
 
 provider "aws" {
   region = "ap-northeast-2"
+
+  default_tags {
+    tags = {
+      Project = "ku-grade-update-notifier"
+    }
+  }
 }
 
 # ====== sns topic & email subscription ======
@@ -52,10 +58,6 @@ resource "aws_lambda_function" "grade-update-checker-lambda" {
     variables = {
       SNS_TOPIC_ARN = aws_sns_topic.grade-update-topic.arn
     }
-  }
-
-  tags = {
-    Project = "ku-grade-update-notifier"
   }
 }
 
