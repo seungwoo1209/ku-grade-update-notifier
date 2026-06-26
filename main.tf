@@ -60,6 +60,12 @@ resource "aws_lambda_function" "grade-update-checker-lambda" {
 }
 
 # ====== eventbridge scheduler(invokes lambda every 5 minutes) ======
+variable "schedule_state" {
+  description = "EventBridge 스케줄 상태 (ENABLED/DISABLED). stop.sh/resume.sh가 토글함"
+  type        = string
+  default     = "ENABLED"
+}
+
 resource "aws_lambda_permission" "allow_scheduler" {
   statement_id  = "AllowSchedulerInvoke"
   action        = "lambda:InvokeFunction"
@@ -77,6 +83,7 @@ resource "aws_scheduler_schedule" "grade-update-checker-schedule" {
   }
 
   schedule_expression = "rate(5 minutes)"
+  state               = var.schedule_state
 
   target {
     arn      = aws_lambda_function.grade-update-checker-lambda.arn
